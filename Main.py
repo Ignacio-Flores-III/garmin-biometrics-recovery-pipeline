@@ -11,10 +11,11 @@ def parse_duration_to_minutes(val):
     m = int(mins.group(1)) if mins else 0
     return h * 60 + m
 
+# 1. Load Datasets from data/ folder
 # 1. Load Datasets
-df_act = pd.read_excel('GARMIN ACTVITIES .xlsx', sheet_name='Activities')
-df_sleep = pd.read_excel('SlEEP.xlsx', sheet_name='Sleep')
-df_stress = pd.read_excel('STRESS.xlsx')
+df_act = pd.read_excel('data/GARMIN ACTVITIES .xlsx', sheet_name='Activities')
+df_sleep = pd.read_excel('data/SlEEP.xlsx', sheet_name='Sleep')
+df_stress = pd.read_excel('data/STRESS.xlsx')
 
 # 2. Process Sleep Data
 df_sleep.rename(columns={'Sleep Score 4 Weeks': 'Date'}, inplace=True)
@@ -40,6 +41,10 @@ stress_clean = df_stress[['date', 'daily_avg_stress']].copy()
 # 4. Process & Aggregate Activity Data
 df_act['date'] = pd.to_datetime(df_act['Date']).dt.date
 df_act['Distance'] = pd.to_numeric(df_act['Distance'], errors='coerce').fillna(0)
+
+# Normalize Swimming Distance: Convert yards to miles (1,760 yards = 1 mile)
+df_act.loc[df_act['Activity Type'] == 'Pool Swim', 'Distance'] = df_act.loc[df_act['Activity Type'] == 'Pool Swim', 'Distance'] / 1760.0
+
 df_act['Calories'] = pd.to_numeric(df_act['Calories'], errors='coerce').fillna(0)
 df_act['Aerobic TE'] = pd.to_numeric(df_act['Aerobic TE'], errors='coerce').fillna(0)
 
